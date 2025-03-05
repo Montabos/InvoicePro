@@ -1,0 +1,87 @@
+# Invoice Generator Roadmap
+
+## Summary
+A simple web application to create, manage, and download professional invoices. Built with Next.js for both the frontend (React-based components) and backend (API routes), styled with Tailwind CSS for a modern UI, and deployed on Vercel to leverage serverless functions.
+
+---
+
+## Key Features
+- Intuitive form for creating and editing invoice details
+- Dynamic item list with quantity, price, and tax calculations
+- Automated subtotal and total calculations
+- Option to preview and download the invoice as a PDF
+- Simple theme switcher (light/dark)
+
+---
+
+## Roadmap
+
+### 1. Project Setup
+1. Create a new Next.js project using `create-next-app`.
+2. Install and configure Tailwind CSS for styling.
+3. Organize project structure:
+   - `/pages` for routes
+   - `/pages/api` for serverless functions
+   - `/components` for modular UI elements
+4. Initialize version control (Git) and set up repository on a platform like GitHub.
+
+### 2. Basic Invoice Form
+1. Create an `InvoiceForm` component to capture invoice data:
+   - Invoice number, date, due date
+   - Business details (name, address, email, phone)
+   - Client details (name, address, email)
+2. Use Tailwind for layout: grids and flex utilities for a clean design.
+3. Store form input values with React state.
+
+### 3. Items Management
+1. Add a dynamic items array in React state.
+2. Provide fields for description, quantity, and price.
+3. Implement “Add Item” and “Remove Item” buttons.
+4. Calculate subtotal by summing each item's total (quantity × price).
+5. Optional: add a tax rate input, calculating total cost with tax.
+
+### 4. Invoice Preview
+1. Create an `InvoicePreview` component to display invoice info in a print-friendly layout.
+2. Use a modal or a dedicated page for previewing.
+3. Apply formatting styles (borders, spacing, typography) for a professional PDF look.
+
+### 5. PDF Generation (API Route)
+1. Create a `/pages/api/generate-pdf.js` file.
+2. Install `puppeteer` or a similar library to handle PDF creation on the server.
+3. Send invoice data (via POST request) to the API route to render an HTML invoice.
+4. Generate a PDF buffer, return it to the client with appropriate headers.
+5. Trigger file download in the client after receiving the PDF.
+
+### 6. Theming
+1. Add a theme toggle (light/dark) using Tailwind’s dark mode feature.
+2. Provide a user-friendly toggle (switch or button).
+3. Ensure consistent color usage across components.
+
+### 7. Deployment
+1. Connect the project repository to Vercel.
+2. Configure environment variables if needed.
+3. Verify that serverless functions (the PDF generation API route) work correctly.
+4. Test the invoice creation and download processes in production.
+
+### 9. Testing & QA
+1. Write integration tests for form submission and PDF generation.
+2. Check cross-browser compatibility (Chrome, Firefox, Safari).
+3. Collect user feedback on UI design and performance.
+4. Perform final optimizations (image optimization, code splitting).
+
+### 10. Launch & Maintenance
+1. Communicate launch to potential users.
+2. Monitor Vercel analytics for performance data.
+3. Address issues or feature requests.
+4. Plan iterative improvements, such as more advanced invoice customization or analytics.
+
+---
+
+## Final Goal
+Have a fully functional invoice generator app that:
+- Is easy to maintain and extend.
+- Lets users quickly create, preview, and download invoices.
+- Provides a modern, responsive UI thanks to Tailwind CSS.
+- Uses Next.js API routes for server-side logic without a separate backend server.
+
+
