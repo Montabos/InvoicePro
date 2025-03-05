@@ -17,7 +17,7 @@ export default function InvoicePreview({ invoice }: InvoicePreviewProps) {
   };
 
   return (
-    <div className="print:p-6 max-w-4xl mx-auto bg-white dark:bg-gray-950 shadow-sm rounded-lg overflow-hidden">
+    <div className="print:p-6 max-w-4xl mx-auto bg-white dark:bg-gray-900 shadow-sm rounded-lg overflow-hidden">
       <div className="p-6 space-y-6">
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start gap-6">
@@ -31,7 +31,7 @@ export default function InvoicePreview({ invoice }: InvoicePreviewProps) {
               <p>{invoice.business.phone}</p>
             </div>
           </div>
-          
+
           <div className="text-right">
             <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-50">INVOICE</h2>
             <p className="mt-1 text-sm text-muted-foreground">#{invoice.invoiceNumber}</p>
@@ -47,35 +47,37 @@ export default function InvoicePreview({ invoice }: InvoicePreviewProps) {
             </div>
           </div>
         </div>
-        
-        <Separator />
-        
+
+        <div className="w-full h-2 bg-primary rounded-full my-6"></div>
+
         {/* Client Info */}
-        <div>
-          <h3 className="text-lg font-medium mb-2">Bill To:</h3>
-          <div className="text-sm">
-            <p className="font-semibold text-lg">{invoice.client.name}</p>
-            <address className="not-italic mt-1 text-muted-foreground whitespace-pre-line">
-              {invoice.client.address}
-            </address>
-            <p className="mt-1">{invoice.client.email}</p>
+        <div className="grid grid-cols-2 gap-8">
+          <div>
+            <h3 className="text-lg font-medium mb-2">Bill To:</h3>
+            <div className="text-sm">
+              <p className="font-semibold text-lg">{invoice.client.name}</p>
+              <address className="not-italic mt-1 text-muted-foreground whitespace-pre-line">
+                {invoice.client.address}
+              </address>
+              <p className="mt-1">{invoice.client.email}</p>
+            </div>
           </div>
         </div>
-        
+
         {/* Items Table */}
-        <div className="overflow-x-auto">
+        <div className="mt-8">
           <Table>
-            <TableHeader>
+            <TableHeader className="bg-accent">
               <TableRow>
-                <TableHead className="w-[60%]">Description</TableHead>
-                <TableHead className="text-right">Qty</TableHead>
-                <TableHead className="text-right">Price</TableHead>
-                <TableHead className="text-right">Amount</TableHead>
+                <TableHead className="w-[60%] text-accent-foreground">Description</TableHead>
+                <TableHead className="text-right text-accent-foreground">Qty</TableHead>
+                <TableHead className="text-right text-accent-foreground">Price</TableHead>
+                <TableHead className="text-right text-accent-foreground">Amount</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {invoice.items.map((item, index) => (
-                <TableRow key={index}>
+                <TableRow key={index} className="border-b">
                   <TableCell className="align-top font-medium">{item.description}</TableCell>
                   <TableCell className="text-right align-top">{item.quantity}</TableCell>
                   <TableCell className="text-right align-top">${item.price.toFixed(2)}</TableCell>
@@ -85,22 +87,21 @@ export default function InvoicePreview({ invoice }: InvoicePreviewProps) {
             </TableBody>
           </Table>
         </div>
-        
+
         {/* Totals */}
-        <div className="flex justify-end">
-          <Card className="w-full sm:w-72">
+        <div className="mt-8 flex justify-end">
+          <Card className="w-64">
             <CardContent className="p-4">
               <div className="space-y-1 text-sm">
-                <div className="flex justify-between">
-                  <span>Subtotal:</span>
+                <div className="flex justify-between py-2">
+                  <span className="text-muted-foreground">Subtotal:</span>
                   <span>${invoice.subTotal.toFixed(2)}</span>
                 </div>
-                <div className="flex justify-between">
-                  <span>Tax ({invoice.taxRate}%):</span>
+                <div className="flex justify-between py-2 border-b">
+                  <span className="text-muted-foreground">Tax ({invoice.taxRate}%):</span>
                   <span>${invoice.taxAmount.toFixed(2)}</span>
                 </div>
-                <Separator className="my-2" />
-                <div className="flex justify-between font-medium">
+                <div className="flex justify-between py-2 font-bold text-lg text-primary">
                   <span>Total:</span>
                   <span>${invoice.total.toFixed(2)}</span>
                 </div>
@@ -108,18 +109,20 @@ export default function InvoicePreview({ invoice }: InvoicePreviewProps) {
             </CardContent>
           </Card>
         </div>
-        
+
         {/* Notes */}
         {invoice.notes && (
-          <div className="border-t pt-4 text-sm text-muted-foreground">
-            <h3 className="font-medium text-foreground mb-1">Notes</h3>
-            <p>{invoice.notes}</p>
+          <div className="mt-8 p-4 bg-accent rounded-lg">
+            <h3 className="font-semibold mb-2 text-accent-foreground">Notes:</h3>
+            <p className="text-muted-foreground whitespace-pre-line">{invoice.notes}</p>
           </div>
         )}
-        
+
         {/* Footer */}
-        <div className="text-center text-sm text-muted-foreground mt-8">
-          <p>Thank you for your business!</p>
+        <div className="mt-12 text-center">
+          <div className="inline-block px-8 py-3 bg-primary text-primary-foreground rounded-full">
+            Thank you for your business!
+          </div>
         </div>
       </div>
     </div>
