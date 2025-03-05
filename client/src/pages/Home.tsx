@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
@@ -33,6 +33,22 @@ export default function Home() {
   const [invoice, setInvoice] = useState<Invoice | null>(null);
   const theme = colorThemes[selectedTheme];
 
+  const [subtotal, setSubtotal] = useState(0);
+  const [tax, setTax] = useState(0);
+  const [total, setTotal] = useState(0);
+
+  useEffect(() => {
+    if (invoice) {
+      const newSubtotal = invoice.items.reduce((acc, item) => acc + (item.quantity * item.price), 0);
+      const newTax = newSubtotal * (invoice.taxRate / 100); // Use tax rate from invoice data
+      const newTotal = newSubtotal + newTax;
+
+      setSubtotal(newSubtotal);
+      setTax(newTax);
+      setTotal(newTotal);
+    }
+  }, [invoice]);
+
   const triggerConfetti = () => {
     confetti({
       particleCount: 100,
@@ -44,6 +60,14 @@ export default function Home() {
   const handleFormSubmit = (formData: Invoice) => {
     setInvoice(formData);
     setShowPreview(true);
+  };
+
+  // Add this function to handle item price changes
+  const handleItemPriceChange = (updatedItems: Invoice['items']) => {
+    if (invoice) {
+      const updatedInvoice = { ...invoice, items: updatedItems };
+      setInvoice(updatedInvoice);
+    }
   };
 
   const handleGeneratePDF = async () => {
@@ -158,18 +182,11 @@ export default function Home() {
 
               <Card className={`border-l-4 ${theme.border} shadow-sm hover:shadow transition-shadow duration-300`}>
                 <CardContent className="p-6">
-                  <InvoiceForm onSubmit={handleFormSubmit} initialData={invoice} />
-
-                  <div className="flex justify-end space-x-4 mt-6">
-                    <Button
-                      variant="outline"
-                      onClick={() => invoice && setShowPreview(true)}
-                      disabled={!invoice}
-                      className="group"
-                    >
-                      Preview Invoice
-                      <ChevronsRight className="h-4 w-4 ml-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                    </Button>
+                  <InvoiceForm onSubmit={handleFormSubmit} initialData={invoice} onItemPriceChange={handleItemPriceChange} />
+                  <div className="mt-4">
+                    <p>Subtotal: ${subtotal.toFixed(2)}</p>
+                    <p>Tax ({invoice?.taxRate}%): ${tax.toFixed(2)}</p>
+                    <p>Total: ${total.toFixed(2)}</p>
                   </div>
                 </CardContent>
               </Card>

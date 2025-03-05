@@ -21,11 +21,15 @@ import { useState, useEffect } from "react";
 interface InvoiceFormProps {
   onSubmit: (data: Invoice) => void;
   initialData: Invoice | null;
+  onItemPriceChange: (updatedItems: Invoice['items']) => void;
 }
 
-export default function InvoiceForm({ onSubmit, initialData }: InvoiceFormProps) {
-  const [subTotal, setSubTotal] = useState(0);
-  
+export default function InvoiceForm({ onSubmit, initialData, onItemPriceChange }: InvoiceFormProps) {
+  const [items, setItems] = useState(initialData?.items || []);
+  const [subtotal, setSubtotal] = useState(0);
+  const [tax, setTax] = useState(0);
+  const [total, setTotal] = useState(0);
+
   const defaultValues: Invoice = initialData || {
     invoiceNumber: `INV-${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}${String(Math.floor(Math.random() * 1000)).padStart(3, '0')}`,
     invoiceDate: new Date().toISOString().slice(0, 10),
@@ -61,23 +65,24 @@ export default function InvoiceForm({ onSubmit, initialData }: InvoiceFormProps)
   });
 
   // Watch for changes in items to calculate subtotal
-  const items = form.watch("items");
   const taxRate = form.watch("taxRate");
 
   useEffect(() => {
-    const calculatedSubTotal = items.reduce(
-      (acc, item) => acc + item.quantity * item.price,
-      0
-    );
-    
-    const taxAmount = (calculatedSubTotal * taxRate) / 100;
-    const total = calculatedSubTotal + taxAmount;
-    
-    setSubTotal(calculatedSubTotal);
-    form.setValue("subTotal", calculatedSubTotal);
-    form.setValue("taxAmount", taxAmount);
-    form.setValue("total", total);
-  }, [items, taxRate, form]);
+    const newSubtotal = items.reduce((acc, item) => acc + item.quantity * item.price, 0);
+    const newTax = newSubtotal * 0.1; // Assuming a 10% tax rate
+    const newTotal = newSubtotal + newTax;
+
+    setSubtotal(newSubtotal);
+    setTax(newTax);
+    setTotal(newTotal);
+    onItemPriceChange(items);
+  }, [items, onItemPriceChange]);
+
+  const handleItemChange = (index, newItem) => {
+    const newItems = [...items];
+    newItems[index] = newItem;
+    setItems(newItems);
+  };
 
   return (
     <Form {...form}>
@@ -192,6 +197,7 @@ export default function InvoiceForm({ onSubmit, initialData }: InvoiceFormProps)
               setValue={form.setValue}
               getValues={form.getValues}
               watch={form.watch}
+              onItemChange={handleItemChange}
             />
             
             <Separator className="my-4" />
@@ -199,19 +205,19 @@ export default function InvoiceForm({ onSubmit, initialData }: InvoiceFormProps)
             <div className="space-y-2 text-right">
               <div className="flex justify-between font-medium">
                 <span>Subtotal:</span>
-                <span>${subTotal.toFixed(2)}</span>
+                <span>${subtotal.toFixed(2)}</span>
               </div>
               
               <div className="flex justify-between font-medium">
-                <span>Tax ({form.watch("taxRate")}%):</span>
-                <span>${form.watch("taxAmount").toFixed(2)}</span>
+                <span>Tax (10%):</span>
+                <span>${tax.toFixed(2)}</span>
               </div>
               
               <Separator />
               
               <div className="flex justify-between text-lg font-bold">
                 <span>Total:</span>
-                <span>${form.watch("total").toFixed(2)}</span>
+                <span>${total.toFixed(2)}</span>
               </div>
             </div>
           </CardContent>
