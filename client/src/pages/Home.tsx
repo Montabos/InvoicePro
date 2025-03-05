@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -9,12 +9,15 @@ import InvoicePreview from "@/components/InvoicePreview";
 import { apiRequest } from "@/lib/queryClient";
 import ThemeToggle from "@/components/ThemeToggle";
 import { Invoice } from "@shared/schema";
+import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState("create");
   const [invoice, setInvoice] = useState<Invoice | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const { toast } = useToast();
+  const invoicePreviewRef = useRef<HTMLDivElement>(null);
 
   const handleFormSubmit = (formData: Invoice) => {
     setInvoice(formData);
@@ -22,23 +25,42 @@ export default function Home() {
   };
 
   const handleGeneratePDF = async () => {
-    if (!invoice) return;
-    
+    if (!invoice || !invoicePreviewRef.current) return;
+
     setIsGenerating(true);
     try {
-      const response = await apiRequest("POST", "/api/invoices/generate-pdf", invoice);
-      
-      // Typically we would download the file here
-      // For now, we'll just simulate a successful download with a delay
-      setTimeout(() => {
-        setIsGenerating(false);
-        toast({
-          title: "Invoice PDF generated!",
-          description: "Your invoice has been generated and downloaded.",
-          variant: "default",
-        });
-      }, 1500);
+      // Generate PDF using html2canvas and jsPDF
+      const element = invoicePreviewRef.current;
+      const canvas = await html2canvas(element, {
+        scale: 2, // Higher scale for better quality
+        useCORS: true,
+        logging: false,
+        backgroundColor: document.documentElement.classList.contains('dark') ? '#1e293b' : '#ffffff',
+      });
+
+      const imgData = canvas.toDataURL('image/png');
+
+      // Determine page size based on canvas dimensions (portrait or landscape)
+      const orientation = canvas.width > canvas.height ? 'l' : 'p';
+      const pdf = new jsPDF(orientation, 'pt', [canvas.width, canvas.height]);
+
+      // Add the image to the PDF
+      pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
+
+      // Generate filename based on invoice number and date
+      const filename = `invoice-${invoice.invoiceNumber.replace(/[^a-zA-Z0-9]/g, '-')}.pdf`;
+
+      // Save the PDF
+      pdf.save(filename);
+
+      setIsGenerating(false);
+      toast({
+        title: "Invoice PDF generated!",
+        description: "Your invoice has been downloaded to your computer.",
+        variant: "default",
+      });
     } catch (error) {
+      console.error('PDF generation error:', error);
       setIsGenerating(false);
       toast({
         title: "Error",
@@ -111,7 +133,9 @@ export default function Home() {
             {invoice ? (
               <Card>
                 <CardContent className="p-6">
-                  <InvoicePreview invoice={invoice} />
+                  <div ref={invoicePreviewRef}>
+                    <InvoicePreview invoice={invoice} />
+                  </div>
                 </CardContent>
               </Card>
             ) : (
